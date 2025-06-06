@@ -1,0 +1,113 @@
+import React, { useState, useRef } from 'react';
+import Header from './components/Header';
+import StickerCanvas from './components/StickerCanvas';
+import Controls from './components/Controls';
+import { useStickers } from './hooks/useStickers';
+
+function App() {
+  const [showSuccess, setShowSuccess] = useState(false);
+  const canvasRef = useRef<any>(null);
+  const {
+    stickers,
+    stickerTypes,
+    addSticker,
+    updateSticker,
+    deleteSticker,
+    clearAllStickers,
+  } = useStickers();
+
+  const handleDownload = () => {
+    // Trigger download from canvas component
+    const hiddenButton = document.getElementById('hidden-download-trigger');
+    if (hiddenButton) {
+      hiddenButton.click();
+    }
+    
+    setShowSuccess(true);
+    setTimeout(() => setShowSuccess(false), 3000);
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+      {/* Background decorative elements */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-indigo-400/20 to-purple-400/20 rounded-full blur-3xl" />
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-tr from-blue-400/20 to-indigo-400/20 rounded-full blur-3xl" />
+      </div>
+
+      <div className="relative z-10 container mx-auto px-4 py-8">
+        <Header />
+        
+        <div className="max-w-7xl mx-auto">
+          <div className="grid lg:grid-cols-[1fr,300px] gap-8 items-start">
+            {/* Canvas Area */}
+            <div className="flex flex-col items-center">
+              <StickerCanvas
+                ref={canvasRef}
+                stickers={stickers}
+                onUpdateSticker={updateSticker}
+                onDeleteSticker={deleteSticker}
+                onDownload={() => {
+                  setShowSuccess(true);
+                  setTimeout(() => setShowSuccess(false), 3000);
+                }}
+              />
+              
+              {/* Status messages */}
+              <div className="mt-4 text-center space-y-2">
+                {stickers.length === 0 ? (
+                  <p className="text-gray-500 text-sm">
+                    Click a sticker button to get started! 🎨
+                  </p>
+                ) : (
+                  <p className="text-gray-600 text-sm">
+                    {stickers.length} sticker{stickers.length !== 1 ? 's' : ''} on canvas
+                  </p>
+                )}
+                
+                {showSuccess && (
+                  <div className="inline-flex items-center gap-2 bg-green-100 text-green-800 px-4 py-2 rounded-lg text-sm font-medium">
+                    <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                    Canvas downloaded successfully!
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Controls Sidebar */}
+            <div className="lg:sticky lg:top-8">
+              <div className="bg-white/60 backdrop-blur-sm border border-white/30 rounded-2xl p-6 shadow-xl">
+                <Controls
+                  stickerTypes={stickerTypes}
+                  onAddSticker={addSticker}
+                  onDownload={handleDownload}
+                  onClearAll={clearAllStickers}
+                  hasStickers={stickers.length > 0}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Instructions */}
+        <div className="max-w-4xl mx-auto mt-12">
+          <div className="bg-white/40 backdrop-blur-sm border border-white/30 rounded-2xl p-6">
+            <h2 className="text-xl font-semibold text-gray-800 mb-4">How to Use</h2>
+            <div className="grid md:grid-cols-2 gap-4 text-sm text-gray-600">
+              <div className="space-y-2">
+                <p><strong>➕ Add:</strong> Click sticker buttons to add them to the canvas</p>
+                <p><strong>🔄 Move:</strong> Drag stickers anywhere on the canvas</p>
+              </div>
+              <div className="space-y-2">
+                <p><strong>❌ Delete:</strong> Double-click any sticker to remove it</p>
+                <p><strong>💾 Save:</strong> Download your creation as a PNG image</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default App;
